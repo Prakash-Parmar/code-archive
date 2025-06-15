@@ -1,0 +1,5 @@
+Functionality:
+Reads one character at a time from a file.
+Advances the file pointer to the next character.
+Returns the character read as an integer (specifically, the ASCII value of the character).
+Returns EOF (End of File) if the end of the file is reached or an error occurs. 
