@@ -1,0 +1,45 @@
+# Executables
+*.exe
+*.out
+
+# Object files
+*.o
+*.obj
+
+# Libraries
+*.lib
+*.a
+*.so
+*.dll
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# Debug files
+*.dSYM
+*.gdb
+
+# Compiled code
+*.class
+*.pyc
+
+# IDE specific files
+.vscode/
+.idea/
+*.vcxproj
+*.sln
+*.suo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+*.bak
+*.tmp
+
+# Personal temp file
+temp.*

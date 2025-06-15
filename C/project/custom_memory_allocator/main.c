@@ -116,7 +116,35 @@ void print_block_metadata(BlockHeader* metaBlock){
 	return NULL;
  }
 
- 
+ void *my_realloc(void* ptr, size_t bytes){
+ 	if(ptr == NULL)	return my_malloc(bytes);
+	
+	if(bytes==0) {
+		my_free(ptr);
+		return NULL;
+	}
+
+	BlockHeader *block_before_resize = (BlockHeader *)((uint8_t *)ptr - sizeof(BlockHeader));
+	size_t new_total_required_size = bytes + sizeof(BlockHeader);
+
+	//shrink the block
+	if(new_total_required_size <= block_before_resize->size){
+		//split the block if after allcoatin required bytes there is still enough space left
+		if(block_before_resize->size - new_total_required_size >= sizeof(BlockHeader)){
+			BlockHeader *new_block = (BlockHeader *)((uint8_t *)block_before_resize + new_total_required_size);
+			new_block->size = block_before_resize->size - new_total_required_size;
+			new_block->is_free = 1;
+			new_block->next = block_before_resize->next;
+			new_block->prev = block_before_resize;
+
+			block_before_resize->next = new_block;
+			new_block->next->prev = new_block;
+			return block_before_resize;
+		}else{
+			return ptr;
+		}
+	}
+ } 
 
  int main(int arc, char* const* arv) {
     init_allocator();
