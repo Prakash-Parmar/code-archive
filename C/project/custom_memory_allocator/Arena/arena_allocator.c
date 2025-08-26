@@ -5,14 +5,14 @@
 #include <string.h>
 
 bool is_power_of_two(uintptr_t x){
-	return (x != 0) && ((x && (x-1)) == 0);
+	return (x != 0) && ((x & (x-1)) == 0);
 }
 
 uintptr_t align_forward(uintptr_t ptr, size_t align){
 	uintptr_t p, a, modulo;
 
 	if(!is_power_of_two(align)){
-		printf("\n%d\n", align);
+		printf("\n%zu\n", align);
 		printf("align itself is not power of 2.\n");
 	}
 	p = ptr;
@@ -104,8 +104,29 @@ void arena_free_all(Arena *a){
 }
 
 void arena_view(Arena *a){
+	printf("--------------------------------------------------\n");
 	printf("Arena->buf: %p\n", a->buf);
 	printf("Arena->buf_len: %zu\n", a->buf_len);
 	printf("Arena->curr_offset: %zu\n", a->curr_offset);
 	printf("Arena->prev_offset: %zu\n", a->prev_offset);
+	printf("--------------------------------------------------\n");
 }
+
+Temp_Arena_Memory temp_arena_memory_begin(Arena *a){
+	Temp_Arena_Memory temp;
+	temp.arena = a;
+	temp.prev_offset = a->prev_offset;
+	temp.curr_offset = a->curr_offset;
+	return temp;
+}
+
+
+void temp_arena_memory_end(Temp_Arena_Memory temp){
+	temp.arena->prev_offset = temp.prev_offset;
+	temp.arena->curr_offset = temp.curr_offset;
+}
+
+
+
+
+

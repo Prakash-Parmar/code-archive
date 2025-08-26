@@ -7,6 +7,17 @@
 #include<stdint.h>
 #include<stdio.h>
 typedef struct Arena Arena;
+typedef struct Temp_Arena_Memory Temp_Arena_Memory;
+
+struct Temp_Arena_Memory{
+	Arena *arena;
+	size_t prev_offset;
+	size_t curr_offset;
+};
+
+Temp_Arena_Memory temp_arena_memory_begin(Arena *a);
+void temp_arena_memory_end(Temp_Arena_Memory temp);
+
 struct Arena {
 	unsigned char *buf;
 	size_t buf_len;
