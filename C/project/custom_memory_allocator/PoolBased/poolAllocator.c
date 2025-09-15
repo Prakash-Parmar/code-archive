@@ -38,7 +38,8 @@ size_t align_forward_size(size_t size, size_t align) {
 }
 
 
-void pool_init(Pool *p, void *backing_buffer, size_t backing_buffer_len, size_t chunk_size, size_t chunk_alignment){
+
+void pool_init_align(Pool *p, void *backing_buffer, size_t backing_buffer_len, size_t chunk_size, size_t chunk_alignment){
 	
 	uintptr_t initial_start = (uintptr_t) backing_buffer;
 	uintptr_t start = align_forward_uintptr(initial_start, chunk_alignment);
@@ -57,6 +58,12 @@ void pool_init(Pool *p, void *backing_buffer, size_t backing_buffer_len, size_t 
 	p->head = NULL;
 
 	pool_free_all(p);
+}
+
+#define DEFAULT_CHUNK_ALIGNMENT 16
+
+void pool_init(Pool *p, void *backing_buffer, size_t backing_buffer_len, size_t chunk_size){
+	return pool_init_align(p, backing_buffer, backing_buffer_len, chunk_size, DEFAULT_CHUNK_ALIGNMENT);
 }
 
 void pool_free_all(Pool *p){
