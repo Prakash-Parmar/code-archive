@@ -21,7 +21,6 @@ struct Pool {
 	Pool_Free_Node *head;
 };
 
-
 void pool_free_all(Pool *p);
 void pool_init_align(Pool *p, void *backing_buffer, size_t backing_buffer_length, size_t chunk_size, size_t chunk_alignment);
 void pool_init(Pool *p, void *backing_buffer, size_t backing_buffer_length, size_t chunk_size);
