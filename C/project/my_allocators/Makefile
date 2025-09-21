@@ -18,7 +18,6 @@ free_list: free_list_allocator.o test_freeList.o
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm test_pool.o poolAllocator.o free_list_allocator.o test_freeList.o
-
+	rm *.o
 
 

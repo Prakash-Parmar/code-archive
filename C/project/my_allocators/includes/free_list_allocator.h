@@ -11,12 +11,14 @@ struct BlockHeader {
 };
 
 extern BlockHeader *freeListHead;
+extern size_t g_alignment;
 
 bool is_power_of_two(uintptr_t ptr);
-size_t align_header_size(size_t size, size_t align);
-uintptr_t align_forward_uintptr(uintptr_t initial_start, uintptr_t alignment);
+size_t align_header_size(size_t size);
+uintptr_t align_forward_uintptr(uintptr_t initial_start);
 
 
 void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, size_t alignment);
+void* allocator(size_t size);
 
 #endif
