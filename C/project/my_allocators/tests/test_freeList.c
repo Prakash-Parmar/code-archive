@@ -113,5 +113,15 @@ int main() {
 
 		printf("Test Case 4 Passed!\n");
 
+
+		// --- Test Case 5: checking free ---
+		
+
+		free_memory(ptr1);
+		free_memory(ptr2);
+		free_memory(ptr3);
+		free_memory(ptr7);
+		free_memory(ptr8);
+		free_memory(ptr9);
 		return 0;
 }

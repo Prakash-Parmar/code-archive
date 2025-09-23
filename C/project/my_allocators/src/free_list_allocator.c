@@ -4,7 +4,8 @@
 
 // This is the head of the free list
 BlockHeader *freeListHead = NULL;
-size_t g_alignment = 0;
+size_t G_ALIGNMENT = 0;
+size_t ALIGNED_HEADER_SIZE = 0;
 
 bool is_power_of_two(uintptr_t ptr){
 		return (ptr>0)	&& ((ptr & (ptr-1)) == 0);
@@ -12,21 +13,21 @@ bool is_power_of_two(uintptr_t ptr){
 
 // Aligns the given size to the next multiple of the specified alignment (which must be a power of two).
 size_t align_size_forward(size_t size) {
-		assert((g_alignment & (g_alignment - 1)) == 0); // must be power of two
-		size_t modulo = size % g_alignment;
+		assert((G_ALIGNMENT & (G_ALIGNMENT - 1)) == 0); // must be power of two
+		size_t modulo = size % G_ALIGNMENT;
 		if (modulo == 0) {
 				return size;
 		}
-		return size + (g_alignment - modulo);
+		return size + (G_ALIGNMENT - modulo);
 }
 
 uintptr_t align_forward_uintptr(uintptr_t initial_start){
 		uintptr_t p, a, modulo, padding;
 
-		assert(is_power_of_two(g_alignment));
+		assert(is_power_of_two(G_ALIGNMENT));
 
 		p = initial_start;
-		a = (uintptr_t)g_alignment;
+		a = (uintptr_t)G_ALIGNMENT;
 
 		modulo = p % a;
 
@@ -41,10 +42,10 @@ uintptr_t align_forward_uintptr(uintptr_t initial_start){
 
 void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, size_t alignment){
 
-		g_alignment = alignment;
+		G_ALIGNMENT = alignment;
 
 		//Ensure the header size is a multiple of the alignment
-		size_t aligned_header_size = align_size_forward(sizeof(BlockHeader));
+		ALIGNED_HEADER_SIZE = align_size_forward(sizeof(BlockHeader));
 
 		uintptr_t initial_start = (uintptr_t) backing_buffer;
 		uintptr_t aligned_start = align_forward_uintptr(initial_start);	
@@ -52,7 +53,7 @@ void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, siz
 
 
 		//the initial block must be large enough to hold atleast a blockheader
-		assert(backing_buffer_length > aligned_header_size);
+		assert(backing_buffer_length > ALIGNED_HEADER_SIZE);
 
 		//initially whole memory is single block
 		freeListHead = (BlockHeader *) aligned_start;
@@ -66,10 +67,7 @@ void* allocator(size_t size){
 
 		assert(freeListHead != NULL && "Please initialize allocator with backing buffer");
 
-		//Ensure the header size is a multiple of the alignment
-		size_t aligned_header_size = align_size_forward(sizeof(BlockHeader));
-
-		size_t required_block_size = size + aligned_header_size;
+		size_t required_block_size = size + ALIGNED_HEADER_SIZE;
 		size_t aligned_block_size = align_size_forward(required_block_size);
 
 		BlockHeader *curr = freeListHead;
@@ -110,7 +108,7 @@ void* allocator(size_t size){
 
 
 						}
-						void *ptr = (char*)curr + aligned_header_size;
+						void *ptr = (char*)curr + ALIGNED_HEADER_SIZE;
 						memset(ptr, 0, size);
 
 						// Return the pointer to the user's data
@@ -127,10 +125,65 @@ void* allocator(size_t size){
 
 }
 
+void printBlockHeader(BlockHeader *header){
+
+		printf("\n-----------------------------------\n");
+		printf("header = %lu\n", (uintptr_t)header);
+		printf("header->size = %lu\n",header->size);
+		printf("header->next = %lu\n",(uintptr_t)header->next);
+		printf("-----------------------------------\n");
+}
+
+
+void free_memory(void* ptr) {
+		if (ptr == NULL) {
+				return; // Nothing to free
+		}
 
 
 
+		// Get the block header by moving back from the user's pointer
+		BlockHeader* blockToFree = (BlockHeader*)((char*)ptr - ALIGNED_HEADER_SIZE);
 
+		printBlockHeader(blockToFree);
+
+		// Find the correct insertion point in the address-sorted free list
+		BlockHeader* currentBlock = freeListHead;
+		BlockHeader* prevBlock = NULL;
+
+		while (currentBlock != NULL && currentBlock < blockToFree) {
+				prevBlock = currentBlock;
+				currentBlock = currentBlock->next;
+		}
+
+		// --- Coalescing with the previous block ---
+		if (prevBlock != NULL && (char*)prevBlock + prevBlock->size == (char*)blockToFree) {
+				// Merge with the previous block
+				prevBlock->size += blockToFree->size;
+				blockToFree = prevBlock;
+				// The block is now merged, so we don't need to insert it
+		} else {
+				// Insert the new block into the list
+				if (prevBlock == NULL) {
+						blockToFree->next = freeListHead;
+						freeListHead = blockToFree;
+				} else {
+						blockToFree->next = prevBlock->next;
+						prevBlock->next = blockToFree;
+				}
+		}
+
+		// --- Coalescing with the next block ---
+		// The check is slightly different because blockToFree might have merged with prevBlock
+		//currentBlock = blockToFree->next; 
+		if (currentBlock != NULL && (char*)blockToFree + blockToFree->size == (char*)currentBlock) {
+				// Merge with the next block
+				blockToFree->size += currentBlock->size;
+				blockToFree->next = currentBlock->next;
+		}
+
+		printBlockHeader(blockToFree);
+}
 
 
 

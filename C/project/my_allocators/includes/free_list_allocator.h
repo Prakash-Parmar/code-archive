@@ -21,4 +21,7 @@ uintptr_t align_forward_uintptr(uintptr_t initial_start);
 void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, size_t alignment);
 void* allocator(size_t size);
 
+void printBlockHeader(BlockHeader *header);
+void free_memory(void *ptr);
+
 #endif
