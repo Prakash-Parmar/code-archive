@@ -11,7 +11,9 @@ struct BlockHeader {
 };
 
 extern BlockHeader *freeListHead;
-extern size_t g_alignment;
+extern size_t G_ALIGNMENT;
+extern size_t ALIGNED_HEADER_SIZE;
+
 
 bool is_power_of_two(uintptr_t ptr);
 size_t align_header_size(size_t size);
