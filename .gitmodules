@@ -1,3 +1,6 @@
 [submodule "C/misc/Unit_Testing/unity"]
 	path = C/misc/Unit_Testing/unity
 	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "C/project/my_allocators/unity"]
+	path = C/project/my_allocators/unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
