@@ -145,7 +145,7 @@ void free_memory(void* ptr) {
 		// Get the block header by moving back from the user's pointer
 		BlockHeader* blockToFree = (BlockHeader*)((char*)ptr - ALIGNED_HEADER_SIZE);
 
-		printBlockHeader(blockToFree);
+		//printBlockHeader(blockToFree);
 
 		// Find the correct insertion point in the address-sorted free list
 		BlockHeader* currentBlock = freeListHead;
@@ -182,7 +182,7 @@ void free_memory(void* ptr) {
 				blockToFree->next = currentBlock->next;
 		}
 
-		printBlockHeader(blockToFree);
+		//printBlockHeader(blockToFree);
 }
 
 
