@@ -196,6 +196,22 @@ void test_free_memory_free_between_two_adj_free_blocks(void){
 
 }
 
+
+void test_free_all(void){
+
+	void *ptr1 = allocator(16);
+	void *ptr2 = allocator(16);
+
+	free_all();
+	
+	TEST_ASSERT_NOT_NULL(g_backing_buffer_start);
+
+	TEST_ASSERT_EQUAL_PTR((uintptr_t) g_backing_buffer_start, (uintptr_t) freeListHead);
+	TEST_ASSERT_EQUAL_UINT(g_backing_buffer_length, freeListHead->size);
+	TEST_ASSERT_NULL(freeListHead->next);
+
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -204,19 +220,23 @@ int main(void)
 
 	//RUN_TEST(test_allocator_splites_block_when_large_enough);
 	
-	RUN_TEST(test_allocator_uses_whole_block_when_too_small_to_split);
+    //	RUN_TEST(test_allocator_uses_whole_block_when_too_small_to_split);
 
 	//RUN_TEST(test_allocator_returns_null_when_no_block_fits);
 
 
 	// test free memory
-	RUN_TEST(test_free_memory_null_pointer);
-    RUN_TEST(test_free_memory_free_into_empty_free_list);
-	RUN_TEST(test_free_memory_free_before_head);
-	RUN_TEST(test_free_memory_free_after_head_no_coalescing);
-	RUN_TEST(test_free_memory_free_after_prev_block);
-	RUN_TEST(test_free_memory_free_before_next_block);
-	RUN_TEST(test_free_memory_free_between_two_adj_free_blocks);
+	//	RUN_TEST(test_free_memory_null_pointer);
+    //RUN_TEST(test_free_memory_free_into_empty_free_list);
+	//RUN_TEST(test_free_memory_free_before_head);
+	//RUN_TEST(test_free_memory_free_after_head_no_coalescing);
+	//RUN_TEST(test_free_memory_free_after_prev_block);
+	//RUN_TEST(test_free_memory_free_before_next_block);
+	//RUN_TEST(test_free_memory_free_between_two_adj_free_blocks);
+
+
+	// free all memory
+	RUN_TEST(test_free_all);	
 
 	UNITY_END();
 

@@ -1,3 +1,16 @@
+/**
+ * @file free_list_allocator.c
+ * @author Prakash Parmar (you@domain.com)
+ * @brief This is a simple free list memory allocator implementation in C.
+  It provides functions to initialize the allocator with a backing buffer,
+  allocate memory blocks, free allocated blocks, and reset the allocator.
+ * @version 0.1
+ * @date 2025-11-07
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+
 #include "free_list_allocator.h"
 #include<assert.h>
 #include<string.h>
@@ -6,12 +19,26 @@
 BlockHeader *freeListHead = NULL;
 size_t G_ALIGNMENT = 0;
 size_t ALIGNED_HEADER_SIZE = 0;
+void* g_backing_buffer_start = NULL;
+size_t g_backing_buffer_length = 0;
 
+/**
+ * @brief To check if the given pointer is power of two
+ * 
+ * @param ptr 
+ * @return true 
+ * @return false 
+ */
 bool is_power_of_two(uintptr_t ptr){
 		return (ptr>0)	&& ((ptr & (ptr-1)) == 0);
 }
 
-// Aligns the given size to the next multiple of the specified alignment (which must be a power of two).
+/**
+ * @brief Aligns the given size to the next multiple of the specified alignment (which must be a power of two).
+ * 
+ * @param size 
+ * @return size_t 
+ */
 size_t align_size_forward(size_t size) {
 		assert((G_ALIGNMENT & (G_ALIGNMENT - 1)) == 0); // must be power of two
 		size_t modulo = size % G_ALIGNMENT;
@@ -21,6 +48,12 @@ size_t align_size_forward(size_t size) {
 		return size + (G_ALIGNMENT - modulo);
 }
 
+/**
+ * @brief Aligns the given initial start address to the next multiple of the global alignment. 
+ * 
+ * @param initial_start 
+ * @return uintptr_t 
+ */
 uintptr_t align_forward_uintptr(uintptr_t initial_start){
 		uintptr_t p, a, modulo, padding;
 
@@ -40,6 +73,13 @@ uintptr_t align_forward_uintptr(uintptr_t initial_start){
 
 }
 
+/**
+ * @brief initialize the free list allocator with the given backing buffer. 
+ * 
+ * @param backing_buffer 
+ * @param backing_buffer_length 
+ * @param alignment 
+ */
 void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, size_t alignment){
 
 		G_ALIGNMENT = alignment;
@@ -55,6 +95,10 @@ void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, siz
 		//the initial block must be large enough to hold atleast a blockheader
 		assert(backing_buffer_length > ALIGNED_HEADER_SIZE);
 
+		// store in global variable so it will be used in free_all
+		g_backing_buffer_start = (void *)aligned_start;
+		g_backing_buffer_length = backing_buffer_length;
+
 		//initially whole memory is single block
 		freeListHead = (BlockHeader *) aligned_start;
 		freeListHead->size = backing_buffer_length;
@@ -63,6 +107,12 @@ void initializeAllocator(void *backing_buffer, size_t backing_buffer_length, siz
 		return;
 }
 
+/**
+ * @brief Allocate the memory of given size from the free list allocator. 
+ * 
+ * @param size 
+ * @return void* 
+ */
 void* allocator(size_t size){
 
 		assert(freeListHead != NULL && "Please initialize allocator with backing buffer");
@@ -125,16 +175,12 @@ void* allocator(size_t size){
 
 }
 
-void printBlockHeader(BlockHeader *header){
 
-		printf("\n-----------------------------------\n");
-		printf("header = %lu\n", (uintptr_t)header);
-		printf("header->size = %lu\n",header->size);
-		printf("header->next = %lu\n",(uintptr_t)header->next);
-		printf("-----------------------------------\n");
-}
-
-
+/**
+ * @brief Free the previously allocated memory block pointed by ptr.  
+ * 
+ * @param ptr 
+ */
 void free_memory(void* ptr) {
 		if (ptr == NULL) {
 				return; // Nothing to free
@@ -186,21 +232,37 @@ void free_memory(void* ptr) {
 }
 
 
+/**
+ * @brief Free all the allocated memory and reset the allocator to its initial state.  
+ * 
+ */
+void free_all(){
+
+	assert(g_backing_buffer_start != NULL && "Please initialize allocator with backing buffer first");
+
+	freeListHead = (BlockHeader*) g_backing_buffer_start;
+	freeListHead->size = g_backing_buffer_length;
+	freeListHead->next = NULL;
+
+	return;
+}
 
 
 
 
 
+// -----------------------------------------------------Helper Functions-------------------------------------------------------------
+//This are the function that are not the core functions but this are useful function to check the integrity and logs and many more.
+//
+//
+//
 
+// void check_integrity(){
+	
+// 	BlockHeader* curr = 
+	
 
-
-
-
-
-
-
-
-
+// }
 
 
 

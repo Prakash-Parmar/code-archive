@@ -1,0 +1,179 @@
+\doxysection{src/free\+\_\+list\+\_\+allocator.c File Reference}
+\hypertarget{free__list__allocator_8c}{}\label{free__list__allocator_8c}\index{src/free\_list\_allocator.c@{src/free\_list\_allocator.c}}
+
+
+This is a simple free list memory allocator implementation in C. It provides functions to initialize the allocator with a backing buffer, allocate memory blocks, free allocated blocks, and reset the allocator.  
+
+
+{\ttfamily \#include "{}free\+\_\+list\+\_\+allocator.\+h"{}}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{free__list__allocator_8c_a916898fc3288944ffe2afe053775e0ec}{is\+\_\+power\+\_\+of\+\_\+two}} (uintptr\+\_\+t ptr)
+\begin{DoxyCompactList}\small\item\em To check if the given pointer is power of two. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{free__list__allocator_8c_a2df0ec3f858b488143f4ae0f994f3d8a}{align\+\_\+size\+\_\+forward}} (size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Aligns the given size to the next multiple of the specified alignment (which must be a power of two). \end{DoxyCompactList}\item 
+uintptr\+\_\+t \mbox{\hyperlink{free__list__allocator_8c_ae388388ffc6ae85eda75c966e7dedc9b}{align\+\_\+forward\+\_\+uintptr}} (uintptr\+\_\+t initial\+\_\+start)
+\begin{DoxyCompactList}\small\item\em Aligns the given initial start address to the next multiple of the global alignment. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{free__list__allocator_8c_a520fb365f76e719eb837f7f23323b44a}{initialize\+Allocator}} (void \texorpdfstring{$\ast$}{*}backing\+\_\+buffer, size\+\_\+t backing\+\_\+buffer\+\_\+length, size\+\_\+t alignment)
+\begin{DoxyCompactList}\small\item\em initialize the free list allocator with the given backing buffer. \end{DoxyCompactList}\item 
+void \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{free__list__allocator_8c_abbe04506e30066068083599b753a1139}{allocator}} (size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Allocate the memory of given size from the free list allocator. \end{DoxyCompactList}\item 
+\Hypertarget{free__list__allocator_8c_a06b0b93e79c3232ff9d3b75af03a349a}\label{free__list__allocator_8c_a06b0b93e79c3232ff9d3b75af03a349a} 
+void {\bfseries print\+Block\+Header} (Block\+Header \texorpdfstring{$\ast$}{*}header)
+\item 
+void \mbox{\hyperlink{free__list__allocator_8c_abccba1d0152fec6912c4872f3f12c970}{free\+\_\+memory}} (void \texorpdfstring{$\ast$}{*}ptr)
+\begin{DoxyCompactList}\small\item\em Free the previously allocated memory block pointed by ptr. \end{DoxyCompactList}\item 
+\Hypertarget{free__list__allocator_8c_af4de2f83436cd4ed6744ced00335545a}\label{free__list__allocator_8c_af4de2f83436cd4ed6744ced00335545a} 
+void {\bfseries free\+\_\+all} ()
+\begin{DoxyCompactList}\small\item\em Free all the allocated memory and reset the allocator to its initial state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{free__list__allocator_8c_acae27d9ea25cb54c9cbc7fca21ff745b}\label{free__list__allocator_8c_acae27d9ea25cb54c9cbc7fca21ff745b} 
+Block\+Header \texorpdfstring{$\ast$}{*} {\bfseries free\+List\+Head} = NULL
+\item 
+\Hypertarget{free__list__allocator_8c_aebef7873cd303b8a9c14e658b77bc4c2}\label{free__list__allocator_8c_aebef7873cd303b8a9c14e658b77bc4c2} 
+size\+\_\+t {\bfseries G\+\_\+\+ALIGNMENT} = 0
+\item 
+\Hypertarget{free__list__allocator_8c_a33f21711093c8c0770388393833f530c}\label{free__list__allocator_8c_a33f21711093c8c0770388393833f530c} 
+size\+\_\+t {\bfseries ALIGNED\+\_\+\+HEADER\+\_\+\+SIZE} = 0
+\item 
+\Hypertarget{free__list__allocator_8c_a7a7fafbf5c4d4dd3f43a7fd138cfedec}\label{free__list__allocator_8c_a7a7fafbf5c4d4dd3f43a7fd138cfedec} 
+void \texorpdfstring{$\ast$}{*} {\bfseries g\+\_\+backing\+\_\+buffer\+\_\+start} = NULL
+\item 
+\Hypertarget{free__list__allocator_8c_a523846e9b44b19dd73640ae03e11dc6f}\label{free__list__allocator_8c_a523846e9b44b19dd73640ae03e11dc6f} 
+size\+\_\+t {\bfseries g\+\_\+backing\+\_\+buffer\+\_\+length} = 0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This is a simple free list memory allocator implementation in C. It provides functions to initialize the allocator with a backing buffer, allocate memory blocks, free allocated blocks, and reset the allocator. 
+
+\begin{DoxyAuthor}{Author}
+Prakash Parmar (\href{mailto:you@domain.com}{\texttt{you@domain.\+com}}) 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+0.\+1 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+2025-\/11-\/07
+\end{DoxyDate}
+\begin{DoxyCopyright}{Copyright}
+Copyright (c) 2025 
+\end{DoxyCopyright}
+
+
+\label{doc-func-members}
+\Hypertarget{free__list__allocator_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{free__list__allocator_8c_ae388388ffc6ae85eda75c966e7dedc9b}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!align\_forward\_uintptr@{align\_forward\_uintptr}}
+\index{align\_forward\_uintptr@{align\_forward\_uintptr}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{align\_forward\_uintptr()}{align\_forward\_uintptr()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_ae388388ffc6ae85eda75c966e7dedc9b} 
+uintptr\+\_\+t align\+\_\+forward\+\_\+uintptr (\begin{DoxyParamCaption}\item[{uintptr\+\_\+t}]{initial\+\_\+start}{}\end{DoxyParamCaption})}
+
+
+
+Aligns the given initial start address to the next multiple of the global alignment. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em initial\+\_\+start} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+uintptr\+\_\+t 
+\end{DoxyReturn}
+\Hypertarget{free__list__allocator_8c_a2df0ec3f858b488143f4ae0f994f3d8a}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!align\_size\_forward@{align\_size\_forward}}
+\index{align\_size\_forward@{align\_size\_forward}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{align\_size\_forward()}{align\_size\_forward()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_a2df0ec3f858b488143f4ae0f994f3d8a} 
+size\+\_\+t align\+\_\+size\+\_\+forward (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{size}{}\end{DoxyParamCaption})}
+
+
+
+Aligns the given size to the next multiple of the specified alignment (which must be a power of two). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t 
+\end{DoxyReturn}
+\Hypertarget{free__list__allocator_8c_abbe04506e30066068083599b753a1139}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!allocator@{allocator}}
+\index{allocator@{allocator}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{allocator()}{allocator()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_abbe04506e30066068083599b753a1139} 
+void \texorpdfstring{$\ast$}{*} allocator (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{size}{}\end{DoxyParamCaption})}
+
+
+
+Allocate the memory of given size from the free list allocator. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void\texorpdfstring{$\ast$}{*} 
+\end{DoxyReturn}
+\Hypertarget{free__list__allocator_8c_abccba1d0152fec6912c4872f3f12c970}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!free\_memory@{free\_memory}}
+\index{free\_memory@{free\_memory}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{free\_memory()}{free\_memory()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_abccba1d0152fec6912c4872f3f12c970} 
+void free\+\_\+memory (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{ptr}{}\end{DoxyParamCaption})}
+
+
+
+Free the previously allocated memory block pointed by ptr. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{free__list__allocator_8c_a520fb365f76e719eb837f7f23323b44a}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!initializeAllocator@{initializeAllocator}}
+\index{initializeAllocator@{initializeAllocator}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{initializeAllocator()}{initializeAllocator()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_a520fb365f76e719eb837f7f23323b44a} 
+void initialize\+Allocator (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{backing\+\_\+buffer}{, }\item[{size\+\_\+t}]{backing\+\_\+buffer\+\_\+length}{, }\item[{size\+\_\+t}]{alignment}{}\end{DoxyParamCaption})}
+
+
+
+initialize the free list allocator with the given backing buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em backing\+\_\+buffer} & \\
+\hline
+{\em backing\+\_\+buffer\+\_\+length} & \\
+\hline
+{\em alignment} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{free__list__allocator_8c_a916898fc3288944ffe2afe053775e0ec}\index{free\_list\_allocator.c@{free\_list\_allocator.c}!is\_power\_of\_two@{is\_power\_of\_two}}
+\index{is\_power\_of\_two@{is\_power\_of\_two}!free\_list\_allocator.c@{free\_list\_allocator.c}}
+\doxysubsubsection{\texorpdfstring{is\_power\_of\_two()}{is\_power\_of\_two()}}
+{\footnotesize\ttfamily \label{free__list__allocator_8c_a916898fc3288944ffe2afe053775e0ec} 
+bool is\+\_\+power\+\_\+of\+\_\+two (\begin{DoxyParamCaption}\item[{uintptr\+\_\+t}]{ptr}{}\end{DoxyParamCaption})}
+
+
+
+To check if the given pointer is power of two. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true 
+
+false 
+\end{DoxyReturn}
