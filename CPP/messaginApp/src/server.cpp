@@ -2,16 +2,63 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <thread>
+#include <cstring>
+#include <atomic>
 
 
+std::atomic<bool> isRunning{true};
 
-int main() {
+void receiveMessage(int connectionFD)
+{
+    char buffer_recv[1024] = {0};
+    std::string msg = "";
+    size_t pos = 0;
+    std::string complete_msg = "";
+
+    while (true)
+    {
+
+        int bytesReceived = recv(connectionFD, buffer_recv, sizeof(buffer_recv), 0);
+
+        if (bytesReceived == 0)
+        {
+            std::cout << "Client disconnected" << std::endl;
+            isRunning = false;
+            break;
+        }
+
+        if (bytesReceived < 0)
+        {
+            std::cout << "recv erro. errno: " << errno << std::endl;
+            break;
+        }
+
+        msg.append(buffer_recv, bytesReceived);
+
+        while((pos = msg.find('\n')) != std::string::npos){
+            complete_msg = msg.substr(0, pos);
+
+            std::cout << "Client: " << complete_msg << std::endl;
+
+            msg.erase(0, pos + 1);
+        }
+
+
+    }
+
+    return;
+}
+
+int main()
+{
 
     // Creating a socket
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    
+
     // error handling
-    if(serverSocket == -1){
+    if (serverSocket == -1)
+    {
         std::cout << "Failed to create a socket. errno: " << errno << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -47,37 +94,22 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    char buffer_recv[1024] = {0};
+    
+    std::thread recvThread(receiveMessage, connection);
+
     std::string send_message;
 
-    while(true){
-        std::memset(buffer_recv, 0, sizeof(buffer_recv));
-        
-        int bytesReceived = recv(connection, buffer_recv, sizeof(buffer_recv), 0);
-
-        if(bytesReceived == 0){
-            std::cout << "Client disconnected" << std::endl;
-            break;
-        }
-
-        if(bytesReceived < 0){
-            std::cout << "recv erro. errno: " << errno << std::endl;
-            break;
-        }
-
-        std::cout << "Client: " << buffer_recv << std::endl;
+    while (isRunning)
+    {
 
         send_message = "";
         std::cout << "Server: ";
         std::getline(std::cin, send_message);
-        
+        send_message += '\n';
         send(connection, send_message.c_str(), send_message.size(), 0);
-
-    
     }
-    
- 
-    
+
+    recvThread.join();
 
     // closing the socket and connection
     close(connection);
