@@ -10,69 +10,7 @@
 #include <mutex>
 #include <algorithm>
 
-/**
- * Represents the outcome of a socket operation.
- */
-enum class SocketStatus {
-    SUCCESS,
-    DISCONNECTED,
-    ERR
-};
-
-/**
- * Bundles the status and the number of bytes transferred.
- */
-struct IoResult {
-    SocketStatus status;
-    ssize_t bytes;
-};
-
-/**
- * RAII Wrapper for a TCP Socket.
- */
-class Socket {
-    int fd;
-    std::string ipAddress;
-    int port;
-
-public:
-    explicit Socket(int s) : fd(s), port(0) {}
-
-    ~Socket() {
-        if (fd >= 0) {
-            close(fd);
-            std::cout << "[*] Resource Cleaned: Socket " << fd << " closed." << std::endl;
-        }
-    }
-
-    Socket(const Socket&) = delete;
-    Socket& operator=(const Socket&) = delete;
-
-    /**
-     * Receives data and returns a structured result.
-     */
-    IoResult receive(char* buffer, size_t size) {
-        ssize_t n = ::recv(fd, buffer, size, 0);
-        if (n > 0) return {SocketStatus::SUCCESS, n};
-        if (n == 0) return {SocketStatus::DISCONNECTED, 0};
-        return {SocketStatus::ERR, n};
-    }
-
-    void send(const std::string& message) {
-        ::send(fd, message.c_str(), message.size(), 0);
-    }
-
-    void setIdentity(const sockaddr_in& addr) {
-        char ipStr[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &addr.sin_addr, ipStr, INET_ADDRSTRLEN);
-        ipAddress = ipStr;
-        port = ntohs(addr.sin_port);
-    }
-
-    std::string getIdentity() const {
-        return ipAddress + ":" + std::to_string(port);
-    }
-};
+#include "socket.hpp"
 
 // Global State
 std::atomic<bool> isRunning{true};

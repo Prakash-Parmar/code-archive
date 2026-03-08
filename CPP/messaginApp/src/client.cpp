@@ -5,92 +5,91 @@
 #include <unistd.h>
 #include <thread>
 #include <atomic>
+#include <memory>
 
+#include "socket.hpp"
+
+// Global flag to manage the application lifecycle
 std::atomic<bool> isRunning{true};
 
-void recvMessage(int clientSocket)
-{
-    char buffer_recv[1024] = {0};
-    std::string msg = "";
-    size_t pos = 0;
-    std::string complete_msg = "";
+/**
+ * Background thread function to handle incoming messages from the server.
+ */
+void recvMessage(std::shared_ptr<Socket> clientSocket) {
+    char buffer_recv[1024];
+    std::string accumulationBuffer = "";
 
-    while (true)
-    {
+    while (isRunning) {
+        IoResult result = clientSocket->receive(buffer_recv, sizeof(buffer_recv));
 
-        int bytesReceived = recv(clientSocket, buffer_recv, sizeof(buffer_recv), 0);
-
-        if (bytesReceived == 0)
-        {
-            std::cout << "Client disconnected" << std::endl;
-            isRunning = false;
+        if (result.status != SocketStatus::SUCCESS) {
+            if (result.status == SocketStatus::DISCONNECTED) {
+                std::cout << "\n[!] Connection lost: Server closed the connection." << std::endl;
+            } else {
+                std::cerr << "\n[!] Error receiving from server. errno: " << errno << std::endl;
+            }
+            isRunning = false; // Stop the main loop
             break;
         }
 
-        if (bytesReceived < 0)
-        {
-            std::cout << "recv erro. errno: " << errno << std::endl;
-            break;
+        accumulationBuffer.append(buffer_recv, result.bytes);
+
+        // Extract and print all complete line-delimited messages
+        size_t delimiterPos;
+        while ((delimiterPos = accumulationBuffer.find('\n')) != std::string::npos) {
+            std::string complete_msg = accumulationBuffer.substr(0, delimiterPos);
+            
+            // Move cursor to start of line to clear "Client: " prompt, then print server msg
+            std::cout << "\r" << complete_msg << std::endl;
+            std::cout << "Client: " << std::flush;
+
+            accumulationBuffer.erase(0, delimiterPos + 1);
         }
-
-        msg.append(buffer_recv, bytesReceived);
-
-        while((pos = msg.find('\n')) != std::string::npos){
-            complete_msg = msg.substr(0, pos);
-
-            std::cout << "Server: " << complete_msg << std::endl;
-
-            msg.erase(0, pos + 1);
-        }
-
-
     }
-
-    return;
 }
 
-int main()
-{
-
-    // Creating a socket + error handling
-    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (clientSocket == -1)
-    {
-        std::cout << "Failed to create a socket. errno: " << errno << std::endl;
-        exit(EXIT_FAILURE);
+int main() {
+    // 1. Create raw socket
+    int rawSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (rawSocket == -1) {
+        std::cerr << "Failed to create a socket. errno: " << errno << std::endl;
+        return EXIT_FAILURE;
     }
+
+    // 2. Wrap in RAII Socket class for automatic cleanup
+    auto clientSocket = std::make_shared<Socket>(rawSocket);
 
     sockaddr_in serverAddress{};
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(8080);
-    // serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-    // Convert IP string → binary form
     inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
 
-    // sending connection request + error handling
-    if (connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
-    {
-        std::cout << "failed to connect. errno: " << errno << std::endl;
-        exit(EXIT_FAILURE);
+    // 3. Connect to the server
+    if (connect(rawSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+        std::cerr << "Failed to connect to server at 127.0.0.1:8080. errno: " << errno << std::endl;
+        return EXIT_FAILURE;
     }
 
-    std::thread recvThread (recvMessage, clientSocket);
+    std::cout << "[*] Connected to server. Type your message and press Enter." << std::endl;
 
+    // 4. Start the background receive thread
+    std::thread recvThread(recvMessage, clientSocket);
+
+    // 5. Main Loop: Send messages from standard input
     std::string send_message;
+    while (isRunning) {
+        std::cout << "Client: " << std::flush;
+        if (!std::getline(std::cin, send_message)) break;
 
-    while (isRunning)
-    {
-        send_message = "";
-
-        std::cout << "Client: ";
-        std::getline(std::cin, send_message);
-        send_message += '\n';
-        send(clientSocket, send_message.c_str(), send_message.size(), 0);
+        if (!send_message.empty()) {
+            clientSocket->send(send_message + "\n");
+        }
     }
 
-    recvThread.join();
-    close(clientSocket);
+    isRunning = false;
+    if (recvThread.joinable()) {
+        recvThread.join();
+    }
 
     return 0;
 }
