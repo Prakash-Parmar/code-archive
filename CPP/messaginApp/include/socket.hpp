@@ -48,6 +48,16 @@ public:
     void send(const std::string& message);
 
     /**
+     * Unblocks any pending I/O and prevents further reads/writes.
+     */
+    void shutdownReadWrite();
+
+    /**
+     * Closes the socket if it is still open.
+     */
+    void close();
+
+    /**
      * Translates a binary address into a human-readable identity (IP:Port).
      */
     void setIdentity(const sockaddr_in& addr);
