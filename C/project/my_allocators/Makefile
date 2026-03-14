@@ -1,18 +1,22 @@
+# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -g -I includes/
+CFLAGS = -Wall -Wextra -I unity/src/ -I includes -g -DUNITY_USE_COLOR
 
-all: final
+#source files
+SRC = src
+TEST = tests
+UNITY = unity/src
 
-final : test_pool.o poolAllocator.o
-	$(CC) $(CFLAGS) test_pool.o poolAllocator.o -o final
+BUILD = build
 
-# Rules for sources in src/
-%.o : src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+free_list: $(BUILD)/test_free_list_allocator
+	./$(BUILD)/test_free_list_allocator
 
-# Rules for test case
-%.o : tests/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# pattern rule to build each alocator 
+$(BUILD)/test_%: $(SRC)/%.c $(TEST)/test_%.c $(UNITY)/unity.c
+	$(CC) $(CFLAGS) $^ -o $@
 
+# Clean all binaries
 clean:
-	rm test_pool.o poolAllocator.o
+	rm -rf $(BUILD)/*
+
